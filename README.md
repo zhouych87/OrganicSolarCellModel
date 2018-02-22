@@ -23,7 +23,7 @@ In my paper, Figure 2 shows the overall processes of this multi-scale simulation
 
 
 
-# Please edit the 'in' file of each folder
+# Please edit the 'in' file in each folder
 'in' is the input parameter for the program. Please revise it according to your data.
 
 # Please let me know if there was any bug. Thank you! 
