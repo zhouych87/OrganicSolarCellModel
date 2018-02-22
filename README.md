@@ -1,4 +1,4 @@
-# OrganicSolarCellModel
+# Organic Solar Cell Model
 Towards predicting the power conversion efficiencies of organic solar cells from donor and acceptor molecule structures
 For the detials please check my paper:http://pubs.rsc.org/en/content/articlelanding/2014/TC/C7TC05290A#!divAbstract
 Please cite my paper if you use my codes. 
