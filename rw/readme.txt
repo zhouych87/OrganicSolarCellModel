@@ -1,3 +1,4 @@
-rw_aveRE_CT. record the time at certain period
+rw_aveRE_CT. record time and distnace at certain period
 
-,others record per centain steps
+,
+rw_aveRE     record time and distnace at centain steps
