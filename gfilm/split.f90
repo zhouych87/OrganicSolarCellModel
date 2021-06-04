@@ -2,13 +2,14 @@
 !!ccccccc molecule-atom-distance-basis-core cccccccccccccccccc
       implicit none 
       integer::nam(1000),nm,i,j,k,l,m,n,count(1000),ii,rt,ri,tm,iin,iim  !number of atoms in molecule, and numbers of molecules
-      real::c(1000,1000,3),dc(1000,3),cen(1000,3),dis(3),cutoff,dtc(1000,3) !c(im,ia,3)
+      real::c(3,1000,1000),dc(3,1000),cen(3,1000),dis(3),cutoff,dtc(3,1000) !c(im,ia,3)
       real::tdis,cell(3),kct,tdis1,tdis2(3)
-      character(7)::elemt(1000,1000),delemt(2000) ! ,ALLOCATABLE
+      character(2)::elemt(1000,1000),delemt(2000) ! ,ALLOCATABLE
       character(20)::flname,mnum,mnum2,cnum,cnum2,flnm
       integer::st(1000,100),stt(1000,1000),km(1000),ncpu,tmp,tmp2 !,pair(1000,1000,2)
       character(20)::sets 
       character(100)::cmd
+      integer::nhomo,mhomo
 ! 
 !      write(*,*) 'Please input the coordinate file name'
 !      read(*,*) flname
@@ -30,7 +31,7 @@
          do n=1,nam(m) 
            if (n/=1) then 
            do i=1,3
-            if (abs(c(m,n-1,i)-c(m,n,i))>5) c(m,n,i)=c(m,n,i)+cell(i)*(c(m,n-1,i)-c(m,n,i))/abs(c(m,n-1,i)-c(m,n,i))
+            if (abs(c(i,n-1,m)-c(i,n,m))>5) c(i,n,m)=c(i,n,m)+cell(i)*(c(i,n-1,m)-c(i,n,m))/abs(c(i,n-1,m)-c(i,n,m))
            end do !i
            end if 
         end do ! n
@@ -43,16 +44,16 @@
       do m=1,nm 
  !        write(*,*) "atoms in molecule: ", m ,nam(m)
          do n=1,nam(m) 
-             cen(m,:)=cen(m,:)+c(m,n,:)
+             cen(:,m)=cen(:,m)+c(:,n,m)
          end do 
-         cen(m,:)=cen(m,:)/nam(m)
+         cen(:,m)=cen(:,m)/nam(m)
 !         Write(*,*) m , "central calculation finished" 
       end do 
 !Write(*,*) "central calculation finished" 
 
 
 !##################################################
-!    selection dimer 
+!    select  dimer 
 !##################################################
       dis=10000 
       open(131, file = "connection.dat", status = 'replace') 
@@ -64,18 +65,18 @@ do m=1,nm
     do k =-1,1  
 
        do n=1,nm 
-         dis(1)=cen(n,1)+i*cell(1)-cen(m,1) 
-         dis(2)=cen(n,2)+j*cell(2)-cen(m,2) 
-         dis(3)=cen(n,3)+k*cell(3)-cen(m,3)
+         dis(1)=cen(1,n)+i*cell(1)-cen(1,m) 
+         dis(2)=cen(2,n)+j*cell(2)-cen(2,m) 
+         dis(3)=cen(3,n)+k*cell(3)-cen(3,m)
          tdis=dis(1)**2+dis(2)**2+dis(3)**2
        if (n/=m .and. tdis<cutoff**2 ) then 
-             write(*,*) "cell i j k",m,n,i,j,k,sqrt(tdis)
+!             write(*,*) "cell i j k",m,n,i,j,k,sqrt(tdis)
              tdis1=1000
              do iin=1,nam(n)
              do iim=1,nam(m)
-                   tdis2(1)=c(n,iin,1)+i*cell(1)-c(m,iim,1) 
-                   tdis2(2)=c(n,iin,2)+j*cell(2)-c(m,iim,2) 
-                   tdis2(3)=c(n,iin,3)+k*cell(3)-c(m,iim,3)
+                   tdis2(1)=c(1,iin,n)+i*cell(1)-c(1,iim,m) 
+                   tdis2(2)=c(2,iin,n)+j*cell(2)-c(2,iim,m) 
+                   tdis2(3)=c(3,iin,n)+k*cell(3)-c(3,iim,m)
                    tdis=tdis2(1)**2+tdis2(2)**2+tdis2(3)**2
                   if (tdis<tdis1) tdis1=tdis  ! find minimum to tdis1 
              enddo !iin
@@ -99,7 +100,7 @@ end do !m
     close(131)
 
 !##################################################
-!    Generate file
+!    Generate rw input file
 !##################################################
 
       open(131, file = "connection.dat", status = 'old') 
@@ -117,7 +118,7 @@ end do !m
 
 do m=1,nm 
 !##################################################
-!    Generate list of job file
+!    Generate list of job need to run 
 !##################################################
   if (rt>32) then 
       write(flname,"(a,i0)") "run",ri 
@@ -141,7 +142,8 @@ do m=1,nm
       write(flname,'(a,a)') trim(mnum),'.com' 
   !    write(*,'(a,a)')  'g09  ',trim(flname) !, ".log"  !181 alone  
       write(181,'(a,a)')  'g09  ',trim(flname) !, ".log"  !181 alone  
-      call writegjf(flname,nam(m),c(m,:,:),elemt(m,:),ncpu,sets)
+      call writegjf(flname,nam(m),c(:,:,m),elemt(:,m),ncpu,sets)
+      call getmo(nam(m),elemt(:,m),mHOMO)
       rt=rt+1
 !      st(m,tmp)=0 
 !   end if
@@ -185,11 +187,12 @@ do m=1,nm
 !        if ((st(n,tmp2)==1) ) then ! all of them not calculated 
              write(flname,'(a,a)') trim(mnum2),'.com' 
              write(181,'(a,a)')  'g09  ',trim(flname)  !,".log"  !181 alone 
-             dtc(1:nam(n),1)=c(n,1:nam(n),1)+i*cell(1) 
-             dtc(1:nam(n),2)=c(n,1:nam(n),2)+j*cell(2) 
-             dtc(1:nam(n),3)=c(n,1:nam(n),3)+k*cell(3) 
+             dtc(1,1:nam(n))=c(1,1:nam(n),n)+i*cell(1) 
+             dtc(2,1:nam(n))=c(2,1:nam(n),n)+j*cell(2) 
+             dtc(3,1:nam(n))=c(3,1:nam(n),n)+k*cell(3) 
          
-             call writegjf(flname,nam(n),dtc,elemt(n,:),ncpu,sets)
+             call writegjf(flname,nam(n),dtc,elemt(:,n),ncpu,sets)
+             call getmo(nam(n),elemt(:,n),nHOMO)
               rt=rt+1
 !             st(n,tmp)=0
 !         end if
@@ -203,16 +206,16 @@ do m=1,nm
          write(181,'(a,a)')  'g09  ',flname !, ".log"  !181 dimer  
 
          dc=0; delemt="NO"
-         dc(1:nam(m),:)=c(m,1:nam(m),:);           
-         delemt(1:nam(m))=elemt(m,1:nam(m))
+         dc(:,1:nam(m))=c(:,1:nam(m),m);           
+         delemt(1:nam(m))=elemt(1:nam(m),m)
          
-          dc((1+nam(m)):(nam(m)+nam(n)),:)=dtc(1:nam(n),:)
-         delemt((1+nam(m)):(nam(m)+nam(n)))=elemt(n,1:nam(n))
+          dc(:,(1+nam(m)):(nam(m)+nam(n)))=dtc(:,1:nam(n))
+         delemt((1+nam(m)):(nam(m)+nam(n)))=elemt(1:nam(n),n)
 
          call writegjf(flname,(nam(m)+nam(n)),dc,delemt,ncpu,sets) 
           rt=rt+4
 !         write(181,"(a,xa15,xa15,xa15,xxi0,xxi0,xa)") "calv", mnum,mnum2,flnm, km(m),km(n),">> v.out"
-         write(181,"(a,xa15,xa15,xa15,xi0,xi0,xa,a,i0)")  "calv", mnum,mnum2,flnm, km(m),km(n),">>", "v.out",ri 
+         write(181,"(a,xa15,xa15,xa15,xi0,xi0,xa,a,i0)")  "calv", mnum,mnum2,flnm, int(mhomo/2),int(nhomo/2),">>", "v.out",ri 
 !          write(181,"(a)")  "wait"
          write(181,"(3(xa))") "sleep 30; rm",mnum2,flnm
          stt(m,n)=0 

@@ -1,7 +1,7 @@
       SUBROUTINE readgro(flname,cell,c,elemt,nm,nam,km)
       implicit none
-      real::c(1000,1000,3),tc(3),cell(3)
-      character(7)::elemt(1000,1000) ! ,ALLOCATABLE
+      real::c(3,1000,1000),tc(3),cell(3)
+      character(2)::elemt(1000,1000) ! ,ALLOCATABLE
       character(10)::flname,mname,tmname
       character(5)::telemnt
       integer::i,j,km(1000),nm,na,ia,l1,l2,tmp,nam(1000)
@@ -36,9 +36,19 @@
   !          tcen(km,im,:)=tcen(km,im,:)+tc(:)
           nam(nm)=nam(nm)+1   ! the element number of this kind molecule  
           ia=1+ia
-          c(nm,ia,:)=tc(:)
-          elemt(nm,ia)=telemnt 
-         
+          c(:,ia,nm)=tc(:)
+          telemnt=trim(adjustl(telemnt))
+          
+          if (len(telemnt) == 1) then
+              elemt(ia,nm)=telemnt 
+          else 
+          if (telemnt(2:2)=="1".or. telemnt(2:2)=="2" .or. telemnt(2:2)=="3" .or. telemnt(2:2)=="4" .or. telemnt(2:2)=="5" .or. & 
+        &  telemnt(2:2)=="6" .or.  telemnt(2:2)=="7" .or. telemnt(2:2)=="8" .or. telemnt(2:2)=="9" ) then
+             elemt(ia,nm)=telemnt(1:1) 
+          else 
+             elemt(ia,nm)=telemnt(1:2)
+          end if 
+          end if 
 !         if(km(nm)==2) write(*,"(i8,xi0,xa,xi5,3(xf8.3))") km(nm),nm,elemt(nm,ia),ia,(c(nm,ia,j),j=1,3)
           mname=tmname
       end do 
@@ -51,8 +61,8 @@
 !!!g09 gjf
       SUBROUTINE writegjf(flname,an,coord,elemt,ncpu,sets)
       implicit none
-      real::coord(1000,3)
-      character(7)::elemt(1000)
+      real::coord(3,1000)
+      character(2)::elemt(1000)
       character(20)::flname
       character(20)::sets
       integer::i,j,an,ncpu
@@ -68,9 +78,35 @@
        write(320,*)
        write(320,'(a)') '0 1'
       do i=1,an
-        write(320,'(a1,3(3xf10.4))') trim(adjustl(elemt(i))),(10*coord(i,j),j=1,3) ! from nm to A
+        write(320,'(a1,3(3xf10.4))') trim(adjustl(elemt(i))),(10*coord(j,i),j=1,3) ! from nm to A
       end do
       write(320,*) ' '
       write(320,*) ' '
       close(320)
       END SUBROUTINE 
+
+
+!!!! get HOMO and LUMO
+SUBROUTINE getmo(an,elemt,nHOMO)
+integer::i,j,an,nhomo
+character(2)::elemt(1000)
+nhomo=0
+do i =1,an
+       if (trim(adjustl(elemt(i)))=="H") THEN ;  nhomo=nhomo+1 
+       ELSE if (trim(adjustl(elemt(i)))=="C")THEN;nhomo=nhomo+6
+       ELSE if (trim(adjustl(elemt(i)))=="N")THEN;nhomo=nhomo+7
+       ELSE if (trim(adjustl(elemt(i)))=="O")THEN;nhomo=nhomo+8
+       ELSE if (trim(adjustl(elemt(i)))=="F")THEN;nhomo=nhomo+9
+       ELSE if (trim(adjustl(elemt(i)))=="Si")THEN;nhomo=nhomo+14
+       ELSE if (trim(adjustl(elemt(i)))=="P")THEN;nhomo=nhomo+15
+       ELSE if (trim(adjustl(elemt(i)))=="S")THEN;nhomo=nhomo+16
+       ELSE if (trim(adjustl(elemt(i)))=="Cl")THEN;nhomo=nhomo+17
+       ELSE if (trim(adjustl(elemt(i)))=="Br")THEN;nhomo=nhomo+35
+       ELSE 
+          write(*,*) "unkown element, stop",i,trim(adjustl(elemt(i))),nhomo,elemt(i)
+          stop
+      END IF 
+end do
+
+END SUBROUTINE 
+
