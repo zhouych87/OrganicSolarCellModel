@@ -1,13 +1,14 @@
-# split the PBC thin film
+# Split the PBC thin film
 
-#compile gfortran is required
+# Compile. gfortran is required
 make 
 
 This is output a splitting.exe
 
 
 # How to use it
-1, Revise in file
+
+1, Revise "in" file
 
 tmp.gro               ! name of thin film grop file
 12                    ! number of cores to run gaussian
