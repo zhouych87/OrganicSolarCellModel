@@ -148,7 +148,9 @@ do m=1,nm
 !      st(m,tmp)=0 
 !   end if
    write(mnum,'(2(a))') trim(mnum),".log" ! 
-   
+   write(181,'(a,xa,xa)')  'orbital=`g09log', trim(mnum),'1  | tail -1`'
+   write(181,'(a,xi0,xa)')  'echo', m , '$orbital  >> level.txt' 
+
 !##################################################
 !    Fragment 2: neighbours 
 !##################################################
@@ -194,16 +196,22 @@ do m=1,nm
              call writegjf(flname,nam(n),dtc,elemt(:,n),ncpu,sets)
              call getmo(nam(n),elemt(:,n),nHOMO)
               rt=rt+1
+        write(mnum2,'(a,a)') trim(mnum2), ".log"! 
+        write(181,'(a,xa,xa)')  'orbital=`g09log', trim(mnum2) ,'1  | tail -1`'
+        write(181,'(a,xi0,xa)')  'echo', n , '$orbital  >> level.txt' 
+
 !             st(n,tmp)=0
 !         end if
 
 !##################################################
 !    Dimers
 !##################################################
-         write(mnum2,'(a,a)') trim(mnum2), ".log"! 
-         write(flnm,'(2(i0,a))') m,'t',n,'.log' 
          write(flname,'(2(i0,a))') m,'t',n,'.com ' 
          write(181,'(a,a)')  'g09  ',flname !, ".log"  !181 dimer  
+         write(flnm,'(2(i0,a))') m,'t',n,'.log' 
+         write(181,'(a,xa,xa)')  'orbital=`g09log', trim(flnm) ,'1  | tail -1`'
+         write(181,'(a,xa,xa)')  'echo', trim(flnm) , '$orbital  >> level.txt' 
+
 
          dc=0; delemt="NO"
          dc(:,1:nam(m))=c(:,1:nam(m),m);           
@@ -217,13 +225,13 @@ do m=1,nm
 !         write(181,"(a,xa15,xa15,xa15,xxi0,xxi0,xa)") "calv", mnum,mnum2,flnm, km(m),km(n),">> v.out"
          write(181,"(a,xa15,xa15,xa15,xi0,xi0,xa,a,i0)")  "calv", mnum,mnum2,flnm, int(mhomo/2),int(nhomo/2),">>", "v.out",ri 
 !          write(181,"(a)")  "wait"
-         write(181,"(3(xa))") "sleep 30; rm",mnum2,flnm
+         write(181,"(3(xa))") "sleep 10; rm",mnum2,flnm
          stt(m,n)=0 
      end if 
 
      write(191,"(3(a))") "grep ' ",trim(flnm), " ' tmp.out >> v.out" 
    end do!n
- write(181,"(2(xa))") " rm",mnum 
+ write(181,"(2(xa))") " rm ",mnum 
  
 330 if (rt>32) then 
       close(181)
