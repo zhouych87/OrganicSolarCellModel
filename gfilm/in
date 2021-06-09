@@ -1,5 +1,4 @@
 tmp.gro               ! name of thin film grop file
 12                    !core numbers
 1.5 0.5               ! cutoff distance nm: center, nearest atoms
-428 261               ! number of donor and accepters 
 b3lyp/6-31g           ! basis, please check the generated file
