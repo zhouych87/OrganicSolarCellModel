@@ -6,7 +6,7 @@ Please cite my paper if you use my codes.
 # Codes
 * gfilm (split PBC thin film into molecules and dimers; output molecule connection information; output Gaussian input files to calculate electronic coupling)
 * calv (read Gaussian ouput log file and calculate orbital couplings)
-* rw (random walk simulation)
+* rw (random walk simulation to calculation hole and electron mobility of OSC)
 * solar.out (solar cell numerical simulation)
 * g09log (give HOMO and LUMO levels, other usage)
 * g16log.f90 compile by "gfortran g16log.f90 -o g16log". Use as "g19log xxxx.log 1", will output molecular orbital levels in the range of -7.0 eV -2.0 eV 
