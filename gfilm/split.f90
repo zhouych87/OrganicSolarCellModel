@@ -17,7 +17,6 @@
       read(100,*) flname 
       read(100,*) ncpu 
       read(100,*) cutoff 
-      read(100,*) 
       read(100,"(a20)") sets
       close(100)
       !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -69,7 +68,7 @@ do m=1,nm
          dis(2)=cen(2,n)+j*cell(2)-cen(2,m) 
          dis(3)=cen(3,n)+k*cell(3)-cen(3,m)
          tdis=dis(1)**2+dis(2)**2+dis(3)**2
-       if (n/=m .and. tdis<cutoff**2 ) then 
+       if (n/=m .and. tdis<cutoff**2 ) then ! calcuate the nearest atom distance 
 !             write(*,*) "cell i j k",m,n,i,j,k,sqrt(tdis)
              tdis1=1000
              do iin=1,nam(n)
@@ -84,7 +83,7 @@ do m=1,nm
 !##################################################
 !    selection based on nearest atom distance
 !##################################################
-            if (tdis1 < 0.250) then 
+            if (tdis1 < 0.250) then ! the nearest atom cutoff  distance is 0.5 nm.
                 count(m)=count(m)+1
                 write(131,"(5(xi0),4(xf10.4))") m, i,j,k,n,(dis(l),l=1,3),sqrt(tdis1)             
             end if 
