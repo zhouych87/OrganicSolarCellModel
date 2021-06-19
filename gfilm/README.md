@@ -13,7 +13,7 @@ This is output a splitting.exe
 tmp.gro               ! name of thin film grop file     
 12                    ! number of cores to run gaussian     
 1.5 0.5               ! cutoff distance (nm): center, nearest atoms     
-428 261               ! number of donor and accepters      
+428 261               ! number of donor and accepters, no longer required      
 b3lyp/6-31g           ! basis, please check the generated file    
 
 
@@ -24,22 +24,12 @@ run* are the scripts to run gaussian, which has seperate all gaussian into group
 
 3, After splitting the film, you may use  the following command to find Gaussian calculation that not necessary.     
     
-for i in {1..xxx}; do echo $i; grep -A1 g16 run$i |grep rm ; done
-
-outputs:   
-1  
-2   
-3   
-....    
-186     
-187     
-  rm 442m14r187.log      
-188     
-  rm 449m14r188.log      
-189         
-  rm 451m14r189.log      
-
-That means in the run187 document, the calculation of 442m14r187.com is not necessary. You can remove this line and the line before     
-
-g09 442m14r187.com  
- rm 442m14r187.log
+for i in {1..300}
+do
+line=`grep -nA3 "g09 " run$i| grep rm | awk '{print $1}'| sed  's/-/ /g'`
+for j in $line 
+do
+sline=`echo " $j - 3 "| bc`
+sed -i "$sline,${j}d" run$i      
+done
+done 
