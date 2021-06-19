@@ -1,14 +1,15 @@
-# Split the PBC thin film
+# Split the thin film PBC unit cell
 
-# Compile. gfortran is required
-make 
+## Compile 
+gfortran is required
+`make`
 
-This is output a splitting.exe
+This will output a splitting.exe
 
 
-# How to use it
+## How to use it
 
-1, Revise "in" file
+### 1, Revise "in" file
 
 tmp.gro               ! name of thin film grop file     
 12                    ! number of cores to run gaussian     
@@ -17,19 +18,19 @@ tmp.gro               ! name of thin film grop file
 b3lyp/6-31g           ! basis, please check the generated file    
 
 
-2, Perform the compiled splitting.exe. This step will generate lots of "com", run* files.    
+### 2, Perform the compiled splitting.exe. This step will generate lots of "com", run* files.    
 "com" files are the gaussain input file.    
 run* are the scripts to run gaussian, which has seperate all gaussian into groups. You can run them one by one, or run them at once in several jobs. 
 
 
-3, After splitting the film, you may use  the following command to find Gaussian calculation that not necessary.     
+### 3, After splitting the film, you may use  the following command to remove Gaussian calculation that not necessary.     
     
-for i in {1..300}
-do
-line=`grep -nA3 "g09 " run$i| grep rm | awk '{print $1}'| sed  's/-/ /g'`
-for j in $line 
-do
-sline=`echo " $j - 3 "| bc`
-sed -i "$sline,${j}d" run$i      
-done
-done 
+for i in {1..300}     
+do     
+line= \`grep -nA3 "g09 " run$i| grep rm | awk '{print $1}'| sed  's/-/ /g'\`      
+for j in $line      
+do     
+sline=\`echo " $j - 3 "| bc\`      
+sed -i "$sline,${j}d" run$i    
+done  
+done   
