@@ -13,7 +13,7 @@ This will output a splitting.exe.
 
     tmp.gro               ! name of thin film grop file     
     12                    ! number of cores to run gaussian     
-    1.5 0.5               ! cutoff distance (nm): center, nearest atoms       
+    1.5                   ! center cutoff distance (nm): the nearest atom distance cutoff is 0.5 nm by default.       
     b3lyp/6-31g           ! basis, please check the generated file    
 
 
