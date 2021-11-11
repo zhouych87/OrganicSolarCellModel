@@ -6,7 +6,7 @@ SOURCE=transferintegral.o
 
 oct:	
 	ifort  -FR -lowercase -O3 -c transferintegral.f90
-	ifort -o transferintegral $(SOURCE)  $(LIB) 
+	ifort -o calv $(SOURCE)  $(LIB) 
 
 transferintegral.o : transferintegral.f90
 	ifort  -FR -lowercase -O3 -c transferintegral.f90
@@ -16,4 +16,4 @@ clean:
 	rm *.o
 
 bin:
-	cp transferintegral ~/bin
+	cp calv ~/bin
