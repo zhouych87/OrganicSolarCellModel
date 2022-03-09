@@ -2,7 +2,22 @@
 * rw_aveRE_CT. record time and distnace at certain period
 * rw_aveRE     record time and distnace at centain steps
 
+# The input file is inrw
+```
+100000 2 20000  # steps or periods to record a data; 1 for electron,2 for hole; 20000 number of simulations, 
+-162874.6546 -162876.9996 -162877.1079 -162874.5371 !!! drcn5t e 00 0- -- -0
+-89347.67184 -89349.55312 -89349.71027 -89347.52224 !!!pcbm e 00 0- -- -0
+-162874.6546 -162868.6874 -162868.7941 -162874.5449  !!! drcn5t h 00 0+ ++ +0
+-89347.67184 -89341.08069 -89341.14996 -89347.60429 !!!pvbm h 00 0+ ++ +0 
+```
+00 0- -- -0
 
+Four set symbols, the first character of symbol is the charge of optimized the structure. The second is the charge of energy calculation
+
+* 00 using the zero charge optimized structure to calculate the zero charge state energy
+* 0- using the zero charge optimized structure to calculate the -1 charge state energy
+* -- using the -1 charge optimized structure to calculate the -1 charge state energy
+* -0 using the -1 charge optimized structure to calculate the zero charge state energy
 
 # When the output line is not linear, most of the case are due to the error of reading coupling
 Please check the v.dat and coupling.dat. v.out is the original coupling dat, and coupling.dat is the program readed dat please compare them to find the difference
