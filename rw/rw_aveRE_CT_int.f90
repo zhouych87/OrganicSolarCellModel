@@ -9,7 +9,7 @@
       Real(8)::pp,pi,tstd,avstd,avttt,tttt,ttstd
       Real(8)::rd,sij,hi,hj
       real::start,finish
-      Integer:: eh,nzero,np
+      Integer:: eh,nzero,np,eunit
       character(5)::tmp 
       character(12)::na
       integer::i,j,jj,t,tp,mn,tht,ht,ti
@@ -31,7 +31,7 @@
       pi=3.1415926
       dt=1.0e-8
       open(111,file='inrw',status='old')
-      read(111,*)  np,eh, ns ! tht record interval,electron-hole,simulation times
+      read(111,*)  np,eh, ns,eunit ! tht record interval,electron-hole,simulation times,,unit of E, 1 is eV, 2 is hatree
       read(111,*)  (tre(i,1),i=1,4) ! energies of  kind one: 00 0+ ++ +0
       !no-charge struct without charge; nocharge-struct-charged; charged-struct-charged;charged-struct-without charge
       read(111,*)  (tre(i,2),i=1,4)  !energies of  kind two: 00 0+ ++ +0
@@ -39,7 +39,7 @@
           read(111,*)  (tre(i,1),i=1,4) 
           read(111,*)  (tre(i,2),i=1,4)   
        end if 
-       
+       if (eunit=2) tre=27.2*tre 
       close(111)
       
       open(122,file='coupling.dat',status='replace')
