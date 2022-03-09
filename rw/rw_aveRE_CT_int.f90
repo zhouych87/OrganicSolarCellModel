@@ -39,7 +39,7 @@
           read(111,*)  (tre(i,1),i=1,4) 
           read(111,*)  (tre(i,2),i=1,4)   
        end if 
-       if (eunit=2) tre=27.2*tre 
+       if (eunit==2) tre=27.2*tre 
       close(111)
       
       open(122,file='coupling.dat',status='replace')
