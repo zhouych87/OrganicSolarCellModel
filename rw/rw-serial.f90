@@ -5,7 +5,7 @@
       Real(16)::dp(1000,50),econk(1000,50),hconk(1000,50),ehconk(1000,50),heconk(1000,50),conc(1000,50,3)
       Real(16)::pp,p(1000,50),pi,tstd,avstd,avttt,tttt,ttstd,conk(1000,50)
       Real(16)::rd,sij,hi,hj,cen(1000,3)
-      Integer:: eh 
+      Integer:: eh ,eunit
       character(5)::tmp 
       character(12)::na
       integer::tcon(1000),con(1000,50),i,j,jj,t,st(40000),tp,mn,tht,ht,ti,km(1000)
@@ -20,7 +20,7 @@
       cen=0 
       times=0 
       open(111,file='inrw',status='old')
-      read(111,*)  tht,eh, ns ,np ! tht record interval,electron-hole,simulation times
+      read(111,*)  np,eh, ns ,np,eunit ! tht record interval,electron-hole,simulation times, ,unit of E, 1 is eV, 2 is hatree
       read(111,*)  (tre(1,i),i=1,4) ! energies of  kind one: 00 0+ ++ +0
       ! no-charge struct without charge; nocharge-struct-charged; charged-struct-charged;charged-struct-without charge
       read(111,*)  (tre(2,i),i=1,4)  !energies of  kind two: 00 0+ ++ +0
@@ -29,14 +29,16 @@
           read(111,*)  (tre(2,i),i=1,4)   
        end if 
        
+       if (eunit=2) tre=27.2*tre 
+       
       close(111)
       
-      if (tht<1000) then
-       write(*,*) 'the time is too short!!!!!!'
-        ht=tht
-      else 
-         ht=tht
-      end if
+ !     if (tht<1000) then
+ !      write(*,*) 'the time is too short!!!!!!'
+ !       ht=tht
+ !     else 
+ !        ht=tht
+ !     end if
       
       re(1)=tre(1,4)+tre(1,2)-tre(1,3)-tre(1,1) ! 1 to 1
       re(2)=tre(2,4)+tre(2,2)-tre(2,3)-tre(2,1) ! 2 to 2
