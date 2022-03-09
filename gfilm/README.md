@@ -9,7 +9,7 @@ This will output a splitting.exe.
 
 ## How to use it
 
-### 1, Revise "in" file
+### 1, Revise "in" file, which is the required input file
 
     tmp.gro               ! name of thin film grop file     
     12                    ! number of cores to run gaussian     
