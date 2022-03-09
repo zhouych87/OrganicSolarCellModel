@@ -29,7 +29,7 @@
           read(111,*)  (tre(2,i),i=1,4)   
        end if 
        
-       if (eunit=2) tre=27.2*tre 
+       if (eunit==2) tre=27.2*tre 
        
       close(111)
       
