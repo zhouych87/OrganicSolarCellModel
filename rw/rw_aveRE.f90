@@ -33,7 +33,7 @@
           read(111,*)  (tre(i,1),i=1,4) 
           read(111,*)  (tre(i,2),i=1,4)   
        end if
-       if (eunit=2) tre=27.2*tre ！ change from hatree to eV
+       if (eunit==2) tre=27.2*tre ！ change from hatree to eV
        
       close(111)
 if (myid .eq. 0) then 
