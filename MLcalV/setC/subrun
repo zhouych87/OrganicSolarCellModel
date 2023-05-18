@@ -1,7 +1,0 @@
-for i in {1..128}
-do 
-t=0.000000001*$i*5 
-sed "s/xxxxxxxxx/$t/" v0.py > $i.py 
-nohup python $i.py > $i.log & 
-done
-
