@@ -1,0 +1,47 @@
+nline=`wc -l inparam| awk '{print $1}'`
+#echo $nline
+for i in $(seq 1 $nline)
+do
+t=`head -$i inparam|tail -1`
+nd=`echo $t|awk '{print $1}'`
+
+if [ $1 == "sub" ] ; then 
+    cp -rf rml0 rml
+    echo "python ./alltsize.py $t > size$nd.log" >> rml
+    sbatch -J $i rml
+    rm rml
+elif [ $1 == "run" ] ; then
+    python ./alltsize.py $t > size$nd.log
+
+elif [ $1 == "sub2" ] ; then
+    t2=`head -$i inparam2|tail -1`
+    nd2=`echo $t2|awk '{print $1}'`
+    mae=`echo $t|awk '{print $4}'`
+    mae2=`echo $t2|awk '{print $4}'`
+    if [ $mae > $mae2 ]; then 
+        t=$t2 
+    fi
+    echo $t >> inparamt 
+    cp -rf rml0 rml
+    echo "python ./alltsize.py $t > 2size$nd.log" >> rml
+    sbatch -J $i rml
+    rm rml
+
+elif [ $1 == "run2" ] ; then
+    t2=`head -$i inparam2|tail -1`
+    nd2=`echo $t2|awk '{print $1}'`
+    mae=`echo $t|awk '{print $4}'`
+    mae2=`echo $t2|awk '{print $4}'`
+    if [ $mae > $mae2 ]; then
+        t=$t2
+    fi
+    echo $t >> inparamt
+    python ./alltsize.py $t > 2size$nd.log
+
+elif [ $1 == 'log' ]; then 
+    grep average  size$nd.log 
+elif [ $1 == 'log2' ]; then
+    grep average  2size$nd.log
+fi 
+done
+

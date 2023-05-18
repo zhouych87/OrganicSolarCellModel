@@ -1,0 +1,8 @@
+Fr 0.95 Data refpen.dat Method refpen average R2 0.9998663472093602 average MAE 0.285581421631639
+Fr 0.95 Data cip.dat Method cip average R2 0.9999390352026181 average MAE 0.2130277310412926
+Fr 0.95 Data c3dmrs.dat Method c3dmrs average R2 0.999841336593317 average MAE 0.32792103627385005
+Fr 0.95 Data e3dmrs.dat Method e3dmrs average R2 0.9854286703484287 average MAE 1.9625810301686375
+Fr 0.95 Data p3dmrs.dat Method p3dmrs average R2 0.9998922854139691 average MAE 0.268518149813601
+Fr 0.95 Data u3dmrs.dat Method u3dmrs average R2 0.9994378693426796 average MAE 0.49776746913639647
+Fr 0.95 Data m3dmrs.dat Method m3dmrs average R2 0.999768726770788 average MAE 0.35717693626217195
+Fr 0.95 Data v3dmrs.dat Method v3dmrs average R2 0.9998921865870566 average MAE 0.266730028210546
