@@ -1,0 +1,7 @@
+pen.gro      G54A7FF.itp         ! name of thin film grop file
+24                    !core numbers
+1.5 0.5               ! cutoff distance nm: center, nearest atoms
+
+wB97XD/Def2SVP           ! basis, please check the generated file
+
+
