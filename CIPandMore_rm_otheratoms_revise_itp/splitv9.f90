@@ -6,11 +6,10 @@ integer::nam(10000),nm,i,j,k,l,m,n,count(10000),ii,rt,ri,tm,iin,iim  !number of 
 real::c(3,10000,10000),dc(3,10000),cen(3,10000),dis(3),cutoff,dtc(3,10000) !c(im,ia,3)
 real::tdis,cell(3,3),kct,tdis1,tdis2,vtmp(3),dis1(3),laxs(3),tv1(3),tdis3
 character(2)::elemt(10000,10000),delemt(20000) ! ,ALLOCATABLE
-character(2),allocatable::tpielemt(:,:,:)
+character(2),allocatable::tpielemt(:,:,:),pielemt(:,:,:)
 character(20)::flname,mnum,mnum2,flnm,itpfile
 integer::km(10000),ncpu,tmp,tmp2,piindx(4,100),jj,mindx(4),piindxnew(4,100) !,pair(1000,1000,2)
 character(20)::sets 
-character(6)::label(1000)
 character(200)::cmd
 integer::nhomo,mhomo,rc(3),frc(3),nchain,chain(1000,10),ichain(10),tnv
 logical::levelm(10000),stt(10000,10000)
@@ -52,10 +51,8 @@ close(100)
 !read itp file
 !!!!!!!!!!!!
 
-!readitp(itpfile,nchain,lbchain,ichain,chg,nnc,lnca)
-!call readitp(itpfile,nchain,chain,ichain,chg,nnc,nnca)
-call readitp(itpfile,nchain,lbchain,ichain,chg,nnc,lnca)
 
+call readitp(itpfile,nchain,chain,ichain,chg,nnc,nnca)
 
 if (debug(1)) then 
     i=1
@@ -174,10 +171,11 @@ write(*,"(4(xa3,3(xf12.5)))")  elemt(mindx(1),1),c(:,mindx(1),1),elemt(mindx(2),
 !if (debug(1)) write(*,*) "list all atoms of chain---1: ", chain(1:ichain(1),1)
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!!!! use the first molecule to find index atoms in pi planes
+!!!! use the first molecule to find 
+!!!!! index atoms in pi planes
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 tmp=maxval(ichain(:))
-allocate(picrd(3,tmp,nchain,nm) ,tpicrd(3,tmp,nchain,2),tpielemt(tmp,nchain,2),tpichg(tmp,nchain,2))
+allocate(picrd(3,tmp,nchain,nm),pielemt(tmp,nchain,nm),tpicrd(3,tmp,nchain,2),tpielemt(tmp,nchain,2),tpichg(tmp,nchain,2))
 
 !picrd=0.d0
 !do i=1,nm !   # find pi crd in all crd 
@@ -197,7 +195,8 @@ do i=1,nm !   # find pi crd in all crd
 !i=1
     do k =1,nchain
         do j =1,ichain(k)
-            picrd(:,j,k,i)=c(:,chain(j,k),i)   ! has to be label
+            picrd(:,j,k,i)=c(:,chain(j,k),i)
+			pielemt(j,k,i)=elemt(chain(j,k),i)
         end do
     end do
 end do
@@ -217,7 +216,13 @@ if (debug(1)) then
 end if 
 
 do k =1,nchain
-    tmp_pi(:,1:ichain(k))=picrd(:,1:ichain(k),k,1)  ! (3,1000)# choose the first mvvtmpolecule to calculate index
+    tmp_pi(:,1:ichain(k))=picrd(:,1:ichain(k),k,1)  ! (3,1000)# choose the first molecule to calculate index
+	
+   if (debug(2) .eqv. .false.) then 
+		write(flname,'(a,i0,a)') '1c',k,'.com' 
+		call writegjf(flname,ichain(k),picrd(:,1:ichain(k),k,1),pielemt(1:ichain(k),k,1),ncpu,sets)
+	end if 
+	
     tdis1=0.d0
     tdis2=0.d0
     tdis3=0.d0
@@ -326,7 +331,7 @@ do m=1,nm
 !##################################################
 !    selection based on nearest atom distance.only calculate dimers with distance less than 5A
 !##################################################
-            if (tdis1 < cutoff) then 
+            if (tdis1 < 0.250) then 
                 count(m)=count(m)+1
                 vtmp(1:3)=cen(1:3,n)
                 do i=1,3
@@ -394,11 +399,6 @@ open(603,file="dpiv3d.dat",status='replace')
 open(604,file="dpip3d.dat",status='replace') 
 open(605,file="dpie3d.dat",status='replace') 
 open(606,file="picip.dat",status='replace') 
-
-
-
-
-
 
 write(*,*) "reading connection.dat "
 open(131, file = "connection.dat", status = 'old') 
@@ -530,7 +530,7 @@ do m=1,nm
             write(403,"(i5,i5,12(xf13.5),20(xf11.5))") m,n,morV
             write(404,"(i5,i5,12(xf13.5),20(xf11.5))") m,n,morP
             write(405,"(i5,i5,12(xf13.5),20(xf11.5))") m,n,morE
-			write(410,900) m,n,cip
+			write(410,900) m,n,cip(1:nam(m),1:nam(n))
 
 ! distance of 4v, output 16 distance 
             call  calparam4(mindx(1:4),dc(:,1:nam(m)),nam(m),mindx(1:4),dtc(:,1:nam(n)),nam(n),morU) 
@@ -594,19 +594,33 @@ do m=1,nm
                 call calparam1r(piindxnew(1:4,kkn),tpicrd(:,:,kkn,2),ichain(kkn),outparam)  !! revised mono molecular
                 write(406,"(6(xf10.5))",ADVANCE='NO') outparam(1:6)
             end do 
-
+			!write(*,*) "stage 1";read(*,*) kkn
 !!!!! descriptors:  pi plane-- pi plane
+                   write(500,"(i5,i5)",advance='no') m,n
+                   write(501,"(i5,i5)",advance='no') m,n
+                   write(502,"(i5,i5)",advance='no') m,n
+                   write(503,"(i5,i5)",advance='no') m,n
+                   write(504,"(i5,i5)",advance='no') m,n
+                   write(505,"(i5,i5)",advance='no') m,n
+                   write(600,"(i5,i5)",advance='no') m,n
+                   write(601,"(i5,i5)",advance='no') m,n
+                   write(602,"(i5,i5)",advance='no') m,n
+                   write(603,"(i5,i5)",advance='no') m,n
+                   write(604,"(i5,i5)",advance='no') m,n
+                   write(605,"(i5,i5)",advance='no') m,n
+                   write(606,900,ADVANCE='NO') m,n
+			!write(*,*) "stage 2";read(*,*) kkn
             do kkm=1,nchain
                 do kkn=1,nchain 
                     call calparam2(piindxnew(1:4,kkm),tpicrd(:,:,kkm,1),ichain(kkm),&    !  PI
                     & piindxnew(1:4,kkn),tpicrd(:,:,kkn,2),ichain(kkn),morU)
                     !write(306,"(8(xf10.5),xf10.5)",ADVANCE='NO') outparam(1:9) 
-                    write(306,"(8(xf10.5),xf10.5)",ADVANCE='NO') (morU(i),i=13,21)
+                    write(306,"(9(xf10.5))",ADVANCE='NO') (morU(i),i=13,21)
                     call calparam2r(piindxnew(1:4,kkm),tpicrd(:,:,kkm,1),ichain(kkm),&   ! REVISED PI
                     & piindxnew(1:4,kkn),tpicrd(:,:,kkn,2),ichain(kkn),morU)
                     !write(306,"(8(xf10.5),xf10.5)",ADVANCE='NO') outparam(1:9) 
-                    write(406,"(8(xf10.5),xf10.5)",ADVANCE='NO') (morU(i),i=13,21)
-
+                    write(406,"(9(xf10.5))",ADVANCE='NO') (morU(i),i=13,21)
+				!write(*,*) "stage 2.1";read(*,*) i
                    dc=0; delemt="NO"
                    dc(:,1:ichain(kkm))=tpicrd(:,:,kkm,1)           
                    delemt(1:ichain(kkm))=tpielemt(:,kkm,1)
@@ -616,29 +630,34 @@ do m=1,nm
                    dc(:,(ichain(kkm)+1):tmp)=tpicrd(:,:,kkn,2)
                    delemt((ichain(kkm)+1):tmp)=tpielemt(:,kkn,2)
                    tchg((ichain(kkm)+1):tmp)=chg(1:nam(n))
-   
+   				!write(*,*) "stage 2.2";read(*,*) i
                    call morse3d(sc,method,dc(1:3,1:tmp),delemt(1:tmp),tmp,morU,morM,morV,morP,morE,tchg,morC) !normal 3D-MORSE
-                   write(500,"(i5,i5,12(xf13.5),20(xf11.5))") m,n,morC
-                   write(501,"(i5,i5,12(xf13.5),20(xf11.5))") m,n,morU
-                   write(502,"(i5,i5,12(xf13.5),20(xf11.5))") m,n,morM
-                   write(503,"(i5,i5,12(xf13.5),20(xf11.5))") m,n,morV
-                   write(504,"(i5,i5,12(xf13.5),20(xf11.5))") m,n,morP
-                   write(505,"(i5,i5,12(xf13.5),20(xf11.5))") m,n,morE
-       
-                   call morse3ddimer(sc,method,c(:,1:nam(m),m),elemt(1:nam(m),m),nam(m),&      !CIP,  exclude intramolecular interaction
-                           &dtc(:,1:nam(n)),elemt(1:nam(n),n),nam(n),&
+                   write(500,"(12(xf13.5),20(xf11.5))",ADVANCE='NO') morC
+                   write(501,"(12(xf13.5),20(xf11.5))",ADVANCE='NO') morU
+                   write(502,"(12(xf13.5),20(xf11.5))",ADVANCE='NO') morM
+                   write(503,"(12(xf13.5),20(xf11.5))",ADVANCE='NO') morV
+                   write(504,"(12(xf13.5),20(xf11.5))",ADVANCE='NO') morP
+                   write(505,"(12(xf13.5),20(xf11.5))",ADVANCE='NO') morE
+				!write(*,*) "stage 2.3";read(*,*) i
+				
+                   call morse3ddimer(sc,method,tpicrd(:,:,kkm,1),tpielemt(:,kkm,1),ichain(kkm),&      !CIP,  exclude intramolecular interaction
+                           &tpicrd(:,:,kkn,2),tpielemt(:,kkn,2),ichain(kkn),&
                            & morU,morM,morV,morP,morE,tchg,tchg,morC,cip)
-                   write(600,"(i5,i5,12(xf13.5),20(xf11.5))") m,n,morC
-                   write(601,"(i5,i5,12(xf13.5),20(xf11.5))") m,n,morU
-                   write(602,"(i5,i5,12(xf13.5),20(xf11.5))") m,n,morM
-                   write(603,"(i5,i5,12(xf13.5),20(xf11.5))") m,n,morV
-                   write(604,"(i5,i5,12(xf13.5),20(xf11.5))") m,n,morP
-                   write(605,"(i5,i5,12(xf13.5),20(xf11.5))") m,n,morE
-                   write(606,900) m,n,cip
-
+                   write(600,"(12(xf13.5),20(xf11.5))",advance='no') morC
+                   write(601,"(12(xf13.5),20(xf11.5))",advance='no') morU
+                   write(602,"(12(xf13.5),20(xf11.5))",advance='no') morM
+                   write(603,"(12(xf13.5),20(xf11.5))",advance='no') morV
+                   write(604,"(12(xf13.5),20(xf11.5))",advance='no') morP
+                   write(605,"(12(xf13.5),20(xf11.5))",advance='no') morE
+				!write(*,*) "stage 2.4";read(*,*) i
+                   write(606,'(*(xf9.5))',advance='no') cip(1:ichain(kkm),1:ichain(kkn))
                 end do 
             end do
+			!write(*,*) "stage 3"
+			!read(*,*) kkn
             write(306,*);write(406,*)
+			write(500,*);write(501,*);write(502,*);write(503,*);write(504,*);write(505,*)
+			write(600,*);write(601,*);write(602,*);write(603,*);write(604,*);write(605,*);write(606,*)
         end if 
 
         write(191,"(3(a))") "grep ' ",trim(flnm), " ' tmp.out >> v.out" 

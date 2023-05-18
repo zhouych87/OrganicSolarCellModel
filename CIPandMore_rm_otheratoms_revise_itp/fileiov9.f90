@@ -4,7 +4,6 @@
       character(2)::elemt(10000,10000) ! ,ALLOCATABLE
       character(10)::flname,mname,tmname
       character(5)::telemnt
-	  character(6)::label(10000,10000)
       integer::i,j,km(10000),nm,na,ia,l1,l2,tmp,nam(10000)
 
       open(111,file=flname,status='old')

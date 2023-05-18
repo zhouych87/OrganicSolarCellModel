@@ -1,6 +1,5 @@
 
 SUBROUTINE readitp(itpfile,nchain,chain,ichain,chg,nnc,nnca)
-!SUBROUTINE readitp(itpfile,nchain,lbchain,ichain,chg,nnc,lnca)
 implicit none 
 character(20),intent(in)::itpfile
 integer,intent(out)::nchain,chain(1000,10),ichain(10)
@@ -10,7 +9,6 @@ integer::i,j,k,resid(1000),cgnr(1000),natom,nbond,napi,nbpi
 integer::ii,iii,nnc,nnca(100),tnc
 real::mass(1000)
 character(2)::elemnt(1000)
-character(6)::label(1000),lbchain(1000,10),lnca(100)
 character(4)::res(1000),etype(1000)
 character(20)::fformat
 character(54)::linetxt
@@ -28,14 +26,14 @@ write(*,*) " [ atoms ] .vs.",linetxt
 read(101,"(a)") linetxt  !nr  type  resnr  resid  atom  cgnr  charge    mass
 do 
 	i=i+1            !! 1    HC    1    SIW4     H9    1    0.128   1.0080
-	read(101,*,err=210) k, etype(i),resid(i),res(i),label(i),cgnr(i),chg(i),mass(i)
+	read(101,*,err=210) k, etype(i),resid(i),res(i),elemnt(i),cgnr(i),chg(i),mass(i)
 end do 
 
 210 backspace(101)
 !write(*,*) k, etype(i),resid(i),res(i),elemnt(i),cgnr(i),chg(i),mass(i)
 read(101,"(a)") linetxt
 if (linetxt(1:1) .ne. ';') then
-	write(*,*) "REad atom error",i,k, etype(i),res(i),resid(i),label(i),cgnr(i),chg(i),mass(i)
+	write(*,*) "REad atom error",i,k, etype(i),res(i),resid(i),elemnt(i),cgnr(i),chg(i),mass(i)
 	stop
 else 
 	write(*,*) "Read atom finished"
@@ -144,7 +142,7 @@ end do
 
 !end of find planes
 write(*,*) "nchain: ",nchain
-write(*,'(a)',ADVANCE="NO") "color: "
+write(*,*) "color: "
 do i=1,natom
 	write(*,"(xi0)",ADVANCE="NO") color(i)
 end do 
@@ -157,7 +155,6 @@ ichain=0
 do i =1,napi
 	ichain(color(pi_index(i)))=ichain(color(pi_index(i)))+1
 	chain(ichain(color(pi_index(i))),color(pi_index(i)))=pi_index(i)
-	lbchain(ichain(color(pi_index(i))),color(pi_index(i)))=label(pi_index(i))
 end do
 
 tnc=0
@@ -173,17 +170,26 @@ do i=1,nchain
 	if (ichain(i)>=4) then
 		tnc=tnc+1
 		ichain(tnc)=ichain(i) ! tnc <= i 
+		chain(:,tnc)=chain(:,i)
 	else 
 		do j=1,ichain(i)
 			nnca(nnc+j)=chain(j,i)
-			lnca(nnc+j)=lbchain(j,i)
 		end do 
 		nnc=nnc+ichain(i)
 	end if 
 end do 
 
 nchain=tnc ! corrected number of chain
+write(*,*) "Number of Chains is: ", nchain 
 
+do i=1,nchain
+	write(*,*) "ichain: ",i,ichain(i) 
+	write(*,*) "chain: ",i
+	do j=1,ichain(i)
+		write(*,"(xi0)",ADVANCE="NO") chain(j,i)
+	end do 
+	write(*,*) 
+end do 
 write(*,*) "complete read itp file"
 !nchain,chain,ichain
 END SUBROUTINE 
