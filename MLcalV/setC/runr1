@@ -1,0 +1,24 @@
+#for i in cip.dat picip.dat refpen.dat dpiu3d.dat dpic3d.dat  piu3d.dat \
+# rpi.dat  rmol.dat frame4.dat mgeomty.dat c3dmrs.dat  dmre3d.dat  \
+# dmrv3d.dat dpip3d.dat e3dmrs.dat neardisfft.dat pie3d.dat  dmrm3d.dat  pip3d.dat \
+# p3dmrs.dat  pigeomty.dat piv3d.dat  u3dmrs.dat dmrp3d.dat dpie3d.dat dpiv3d.dat \
+# m3dmrs.dat  pic3d.dat    pim3d.dat    v3dmrs.dat dmrc3d.dat   dmru3d.dat dpim3d.dat dsall.dat 
+for i in cip.dat dmrc3d.dat dmrp3d.dat dpip3d.dat p3dmrs.dat pip3d.dat picip.dat pic3d.dat 
+do
+if [ $1 == 'sub' ] 
+then
+cp -rf rml0 rml
+#echo "python v0r1.py $2 $i > $2.$i.log " >> rml
+echo "python mlp.py $i > mlp.$i.log " >> rml
+echo "date" >> rml
+sbatch -J $i rml
+rm rml
+elif [ $1 == 'log' ] 
+then
+h=`head -1 mlp.$i.log | awk '{print $5, $2, $4}'`
+t=`tail -1 mlp.$i.log | awk '{print $9}'`
+echo $i $h $t
+fi
+done
+
+

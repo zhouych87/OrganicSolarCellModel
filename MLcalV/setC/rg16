@@ -1,0 +1,52 @@
+#!/bin/sh 
+#############################
+#SBATCH -p gaussian
+#SBATCH --qos=urgent
+#SBATCH -J g16
+#SBATCH -n 24
+###SBATCH -t 92:00:00
+#SBATCH -o %x-%j.out
+#SBATCH -e %x-%j.err
+#SBATCH -D .
+
+export GAUSS_EXEDIR=/home/share/zhouych/software/g16
+export g16root=/home/share/zhouych/software 
+source /home/share/zhouych/software/g16/bsd/g16.profile
+export GAUSS_SCRDIR="/data/g09tmp"
+export GAUSS_MEMDEF="48GB"
+
+ulimit -s unlimited 
+
+source /opt/intel/compilers_and_libraries/linux/bin/compilervars.sh intel64
+source /opt/intel/impi/2019.4.243/intel64/bin/mpivars.sh intel64
+source /opt/intel/mkl/bin/mklvars.sh intel64
+
+#g16 y6nn
+#rm -rf /data/g09tmp/*
+
+#g09  y6nn
+rm -rf /data/g09tmp/*
+mkdir /data/g09tmp/zhoutmp
+cp *com run* /data/g09tmp/zhoutmp/
+
+pwd
+workdir=`pwd`
+cd /data/g09tmp/zhoutmp/
+pwd
+#ls
+#cd $workdir
+#pwd
+
+rm -rf /data/g09tmp/zhoutmp/level.txt
+
+for i in {110..119}
+do
+./run$i
+cat v.out$i >> $workdir/v.out$i
+done
+
+cat level.txt >> $workdir/level.txt
+rm -rf /data/g09tmp/zhoutmp
+
+
+

@@ -1,0 +1,8 @@
+for i in refpen u3dmrs dpiu3d dpic3d piu3d cip dmru3d
+do
+rm rml 
+cp  rml0 rml 
+echo "python vps.py  autosk " $i.dat " > mlp_"$i.log  >> rml 
+sbatch -J $i rml 
+done
+
