@@ -1,0 +1,26 @@
+#nline=`wc -l inparam| awk '{print $1}'`
+#echo $nline
+
+#for sets in  '1' '2' '3' '4' '5' '6' '7' '8' '9' '10' '50ns' #'film'
+for sets in 'film' 
+do 
+#for nd in picip frame4 #c3dmrs dmrc3d pic3d   #cip  u3dmrs dmru3d piu3d dpiu3d dpic3d  
+for nd in cip  u3dmrs dmru3d piu3d dpiu3d dpic3d 
+do
+t=`grep "^$nd" ./${sets}/inparamt`
+#echo $i $t
+nd=`echo $t|awk '{print $1}'`
+#echo $nd
+#nohup python ./trainsize/alltsize.py $t > size$nd.log &
+if [ $1 == "run" ]
+then 
+echo "python ./transfer.py $t"
+python ./transfer.py $sets $t > ./transf/$sets.$nd.log
+#cp -rf rml0 rml
+#echo "python ./alltsize.py $t > size$nd.log" >> rml
+#sbatch -J $i rml
+#rm rml
+fi 
+done
+
+done

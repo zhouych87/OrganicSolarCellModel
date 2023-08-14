@@ -1,0 +1,71 @@
+#for n in {1..10}
+for n in  50ns #  film 
+do
+echo "Step: 1search;2gridlog;3size;4sizelog"
+echo "start" $n
+cd $n
+cp -rf ../pythons/* ./
+
+if [ $1 == 'log' ] ; then
+    rm -rf sumparam.log 
+fi
+
+for i in cip  picip  refpen  dpiu3d  dpic3d   piu3d  \
+ rpi   rmol  frame4  mgeomty  c3dmrs   dmre3d   \
+ dmrv3d  dpip3d  e3dmrs  neardisfft  pie3d   dmrm3d   pip3d  \
+ p3dmrs   pigeomty  piv3d   u3dmrs  dmrp3d  dpie3d  dpiv3d  \
+ m3dmrs   pic3d     pim3d     v3dmrs  dmrc3d    dmru3d  dpim3d  dsall
+#for i in   piangle3d # rdfhist piangle3d pirdfhist 
+do
+g='v0r1'
+if [ $1 == 'search' ] ; then
+cp -rf rml0 rml
+echo "python $g.py $i > $g.$i.log " >> rml
+sbatch -J $i rml
+
+elif [ $1 == 'gridlog' ] ; then
+h=`head -1 $g.$i.log | awk '{print $5, $2, $4}'`
+t=`tail -1 $g.$i.log | awk '{print $9}'`
+echo $i $h $t >> sumparam.log
+sed  -e "s|}| |" -e "s|,| |" sumparam.log | awk '{print $1, $3, $4, $5}' > inparam
+
+elif [ $1 == 'search2' ] ; then
+g='v0r2'
+cp -rf rml0 rml
+echo "python $g.py $i > $g.$i.log " >> rml
+sbatch -J $i rml
+
+elif [ $1 == 'gridlog2' ] ; then
+g='v0r2'
+h=`head -1 $g.$i.log | awk '{print $5, $2, $4}'`
+t=`tail -1 $g.$i.log | awk '{print $9}'`
+echo $i $h $t >> sumparam2.log
+sed  -e "s|}| |" -e "s|,| |" sumparam2.log | awk '{print $1, $3, $4, $5}' > inparam2
+fi
+done
+
+#size
+if [ $1 == 'size' ] ; then
+#./runallsize sub
+./runallsize run
+elif [ $1 == 'size2' ] ; then
+./runallsize sub2
+#./runallsize run2
+
+elif [ $1 == 'sizelog' ]; then
+./runallsize log  > sum20.log
+cat size*.log > sumsize.log
+sed -i -e "s|average R2|average R2 R2|g" -e "s|average MAE|MAE|g" sumsize.log
+
+elif [ $1 == 'sizelog2' ]
+then
+./runallsize log2  > 2sum20.log 
+cat 2size*.log > 2sumsize.log
+sed -i -e "s|average R2|average R2 R2|g" -e "s|average MAE|MAE|g" 2sumsize.log
+fi
+
+cd ../
+echo $i 'finished'
+done
+
+
