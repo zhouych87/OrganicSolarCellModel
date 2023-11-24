@@ -38,8 +38,8 @@ for i in range(len(loglist)):
     sets=np.empty(1)
     setm=np.array([0,0])
     for fr in cfr:
-        tdf=df.loc[(np.float64(df[2])==fr)]
-        tmae=tdf[10] ##8
+        tdf=df.loc[(np.float64(df[4])==fr)]
+        tmae=tdf[12] ##8
         sets=np.append(sets.copy(),tmae.mean())
         setm=np.vstack((setm.copy(),np.array([tmae.mean()-tmae.min(),tmae.max()-tmae.mean()])))
     
