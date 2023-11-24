@@ -4,9 +4,9 @@
 
 copy all file into a folder and then input make in the terminal. "desfftmpi" will be generated
 
-#copy it to your PATH folders. make sure you can use is just type desfftmpi in terminal.
+# copy it to your PATH folders. make sure you can use is just type desfftmpi in terminal.
 
-#how to use:
+# how to use:
 
 mpirun -n 24 desfftmpi tet.itp d3dpi cn 0.1 tet.gro 100
 
