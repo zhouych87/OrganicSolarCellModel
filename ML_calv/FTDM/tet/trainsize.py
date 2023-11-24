@@ -88,7 +88,7 @@ for j in range(1,4):
             y_test_predicted=cudf.DataFrame(y_test_predicted).to_pandas()
             r2_test = r2_score(y_test, y_test_predicted)
             mae=mean_absolute_error(y_test, y_test_predicted)
-            print("Train portion {:.2f} Random {} Train_R2 {:.3f} Test_R2 {:.3f} MAE {:.6f}".format(fr,rdn, r2_train, r2_test,mae))
+            print("Descriptors {} Train portion {:.2f} Random {} Train_R2 {:.3f} Test_R2 {:.3f} MAE {:.6f}".format(lnd[j],fr,rdn, r2_train, r2_test,mae))
             
             mmae.append(mae)
             if (mae>20.0):

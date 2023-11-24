@@ -5,7 +5,7 @@ f90comp=mpiifort
 #f90comp=gfortran -g -fcheck=all -Wall -fbacktrace
 # ***********************************************************************
 desgen:  fileio.o morse3d.o readitp.o desgen.o 
-	$(f90comp) desgen.o fileio.o morse3d.o readitp.o -o oscdesgen
+	$(f90comp) desgen.o fileio.o morse3d.o readitp.o -o desfftmpi
 
 fileio.o:  fileio.f90
 	$(f90comp) -c fileio.f90
