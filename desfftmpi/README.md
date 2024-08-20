@@ -1,21 +1,27 @@
-# This program wrote in fortran to generate descriptors
-# intel mpi is required.
-# how to compile
+# This program is written in Fortran to read gro files, and generate Gaussian input and descriptors
+# Intel mpi is required.
 
-copy all file into a folder and then input make in the terminal. "desfftmpi" will be generated
+For more about descriptors please read:
+# Intermolecular 3D-MoRSE Descriptors for Fast and Accurate Prediction of Electronic Couplings in Organic Semiconductors
+J. Chem. Inf. Model. 2023, 63, 5089−5096
+https://pubs.acs.org/doi/10.1021/acs.jcim.3c00786
 
-# copy it to your PATH folders. make sure you can use is just type desfftmpi in terminal.
+# How to compile
+
+copy all files into a folder and then input make in the terminal. "desfftmpi" will be generated
+
+copy it to your PATH folders. make sure you can use it just type desfftmpi in terminal.
 
 # how to use:
 
 mpirun -n 24 desfftmpi tet.itp d3dpi cn 0.1 tet.gro 100
 
 tet.itp: is the force field file to generate films. It is required to find conjugated atoms
-tet.gro: is the atom cooridnation of film, which the format of GROMACS structure.
-d3dpi: tells the program what descriptors will be generated. See below for details.
-cn: is the core function form. See below for details.
+tet.gro: is the atom coordination of film, which is the format of GROMACS structure.
+d3dpi: tells the program what descriptors will be generated. Please take a look below for details.
+cn: is the core function form. Please take a look below for more information.
 0.1: is scale factor
-100: It the dimension of descriptors, which is the range of S in 3D MoRSE.
+100: is the dimension of descriptors, which is the range of S in 3D MoRSE.
 
 
 ##what descriptors will be generated:
