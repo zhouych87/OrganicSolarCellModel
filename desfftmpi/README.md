@@ -17,10 +17,15 @@ copy it to your PATH folders. make sure you can use it just type desfftmpi in te
 mpirun -n 24 desfftmpi tet.itp d3dpi cn 0.1 tet.gro 100
 
 tet.itp: is the force field file to generate films. It is required to find conjugated atoms
+
 tet.gro: is the atom coordination of film, which is the format of GROMACS structure.
+
 d3dpi: tells the program what descriptors will be generated. Please take a look below for details.
+
 cn: is the core function form. Please take a look below for more information.
+
 0.1: is scale factor
+
 100: is the dimension of descriptors, which is the range of S in 3D MoRSE.
 
 
