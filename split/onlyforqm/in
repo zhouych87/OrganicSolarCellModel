@@ -1,0 +1,9 @@
+pm6pht.gro               ! name of thin film grop file
+24                    !core numbers
+0.5               ! cutoff distance nm:  nearest atoms, center curoff have been removed
+0                       ! number of itp file
+wB97XD/Def2SVP           ! basis, please check the generated file
+
+
+
+

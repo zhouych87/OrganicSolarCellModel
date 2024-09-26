@@ -7,7 +7,7 @@ real::c(3,10000,10000),dc(3,10000),cen(3,10000),dis(3),cutoff,dtc(3,10000) !c(im
 real::tdis,cell(3,3),kct,tdis1,tdis2,vtmp(3),dis1(3),laxs(3),tv1(3),tdis3
 character(2)::elemt(10000,10000),delemt(20000) ! ,ALLOCATABLE
 character(2),allocatable::tpielemt(:,:,:),pielemt(:,:,:)
-character(20)::flname,mnum,mnum2,flnm,itpfile
+character(20)::flname,mnum,mnum2,flnm,itpfile,itpfile1
 integer::km(10000),ncpu,tmp,tmp2,piindx(4,100),jj,mindx(4),piindxnew(4,100) !,pair(1000,1000,2)
 character(20)::sets 
 character(6)::label(1000)
@@ -19,7 +19,7 @@ real::tmp_pi(3,1000),sc
 real,allocatable::picrd(:,:,:,:),tpicrd(:,:,:,:),cip(:,:),tpichg(:,:,:)
 real::outparam(10),chg(1000),outparam1(10),outparam2(10),tchg(1000)
 integer::anglhist(100),rhist(100),rchist(100)
-integer::kkm,kkn,nnc,nnca(100)
+integer::kkm,kkn,nnc,nnca(100),nf,nsc
 character(15)::method 
 logical::debug(5),oldcon
 
@@ -29,26 +29,38 @@ debug=.False.
 method="snsr"
 
 if (iargc()>=1) then
-	CALL getarg(1, method)
+    CALL getarg(1, method)
     debug(2)=.True.
 end if 
 
 if (iargc()>=2) then 
-	CaLL getarg(2, flnm)
-	read(flnm,*) sc
+    CaLL getarg(2, flnm)
+    read(flnm,*) sc
 else 
-	sc=1.0
+    sc=1.0
 end if
 
+if (iargc()>=2) then 
+    CaLL getarg(2, flnm)
+    read(flnm,*) nsc
+else 
+    nsc=50
+end if
+
+nf=0
+
 open(100,file="in",status='old') 
-read(100,*) flname,itpfile
+read(100,*) flname
 read(100,*) ncpu 
 read(100,*) cutoff 
 cutoff=cutoff*cutoff
-read(100,*) 
+read(100,*) nf 
 read(100,"(a20)") sets
+if (nf==1) read(100,*)  itpfile
+if (nf==2) read(100,*)  itpfile1
 close(100)
 
+if (nf==1) then 
 call readitp(itpfile,nchain,chain,ichain,chg,nnc,nnca)
 if (debug(1)) then 
     i=1
@@ -59,7 +71,7 @@ if (debug(1)) then
     end do 
     write(*,*) 
 end if 
-
+end if 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !     Read molecules coordinate           !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -152,6 +164,7 @@ write(*,"(4(xa3,3(xf12.5)))")  elemt(mindx(1),1),c(:,mindx(1),1),elemt(mindx(2),
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !!!! use the first molecule to find index atoms in pi planes
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+if (nf==1) then 
 tmp=maxval(ichain(:))
 allocate(picrd(3,tmp,nchain,nm),pielemt(tmp,nchain,nm),tpicrd(3,tmp,nchain,2),tpielemt(tmp,nchain,2),tpichg(tmp,nchain,2))
 
@@ -165,7 +178,7 @@ do i=1,nm !   # find pi crd in all crd
     do k =1,nchain
         do j =1,ichain(k)
             picrd(:,j,k,i)=c(:,chain(j,k),i)   ! has to be label
-			pielemt(j,k,i)=elemt(chain(j,k),i)
+            pielemt(j,k,i)=elemt(chain(j,k),i)
         end do
     end do
 end do
@@ -186,12 +199,12 @@ end if
 
 do k =1,nchain
     tmp_pi(:,1:ichain(k))=picrd(:,1:ichain(k),k,1)  ! (3,1000)# choose the first molecule to calculate index
-	
+    
    if (debug(2) .eqv. .false.) then 
-		write(flname,'(a,i0,a)') '1c',k,'.com' 
-		call writegjf(flname,ichain(k),picrd(:,1:ichain(k),k,1),pielemt(1:ichain(k),k,1),ncpu,sets)
-	end if 
-	
+        write(flname,'(a,i0,a)') '1c',k,'.com' 
+        call writegjf(flname,ichain(k),picrd(:,1:ichain(k),k,1),pielemt(1:ichain(k),k,1),ncpu,sets)
+    end if 
+    
     tdis1=0.d0
     tdis2=0.d0
     tdis3=0.d0
@@ -255,7 +268,8 @@ do k =1,nchain
     write(*,"(a,4i5)") "k pi plane new index", piindxnew(:,k)
     write(*,"(12(xf12.5))") (tmp_pi(:,piindxnew(i,k)),i=1,4)
 end do 
-!index finished 
+end if 
+!pi index finished 
 
 if (debug(1)) stop 
 !##################################################
@@ -318,6 +332,7 @@ end if
 !##################################################
 !    Generate rw input file
 !##################################################
+if (nf.ne.0) then 
 write(cmd,"(a)") "m n S0 S1 S2 S3 S4 S5 S6 S7 S8 S9 S10 S11 S12 S13 &
            & S14 S15 S16 S17 S18 S19 S20 S21 S22 S23 S24 S25 S26 S27 S28 S29 S30 S31"
 ! output parameters
@@ -365,7 +380,7 @@ open(606,file="picip.dat",status='replace')
 
 open(609,file="piangle3d.dat",status='replace') 
 open(610,file="pirdfhist.dat",status='replace') 
-
+end if 
 
 write(*,*) "reading connection.dat "
 open(131, file = "connection.dat", status = 'old') 
@@ -380,7 +395,7 @@ ri=1
 levelm=.true.
 stt=.false.
 
-write(*,*) "begin output g09 and descriptors"
+write(*,*) "begin output g16 and descriptors"
 do m=1,nm 
 !##################################################
 !    Generate list of job need to run 
@@ -399,19 +414,19 @@ do m=1,nm
    i=0; j=0; k=0 
    call ncell(tmp,i,j,k)
    if (debug(2) .eqv. .false.) then 
-		write(mnum,'(i0,a,i0,a,i0)') m,"m",tmp,"r",ri ! 
-		write(flname,'(a,a)') trim(mnum),'.com' 
-		write(181,'(a,a)')  'g09  ',trim(flname) !, ".log"  !181 alone  
-		call writegjf(flname,nam(m),c(:,:,m),elemt(:,m),ncpu,sets)
-		call getmo(nam(m),elemt(:,m),mHOMO)
-		write(mnum,'(2(a))') trim(mnum),".log" ! 
-		if (levelm(m)) then 
-			write(181,'(a)')  'orbital="error"'
-			write(181,'(a,xa,xa)')  'orbital=`g09log', trim(mnum),'1  | tail -1`'
-			write(181,'(a,xi0,xa)')  'echo', m , '$orbital  >> level.txt' 
-			levelm(m)=.false.
-		end if 
-	end if 
+        write(mnum,'(i0,a,i0,a,i0)') m,"m",tmp,"r",ri ! 
+        write(flname,'(a,a)') trim(mnum),'.com' 
+        write(181,'(a,a)')  'g16  ',trim(flname) !, ".log"  !181 alone  
+        call writegjf(flname,nam(m),c(:,:,m),elemt(:,m),ncpu,sets)
+        call getmo(nam(m),elemt(:,m),mHOMO)
+        write(mnum,'(2(a))') trim(mnum),".log" ! 
+        if (levelm(m)) then 
+            write(181,'(a)')  'orbital="error"'
+            write(181,'(a,xa,xa)')  'orbital=`g09log', trim(mnum),'1  | tail -1`'
+            write(181,'(a,xi0,xa)')  'echo', m , '$orbital  >> level.txt' 
+            levelm(m)=.false.
+        end if 
+    end if 
    rt=rt+1   ! used to split run file
 
 !##################################################
@@ -432,7 +447,7 @@ do m=1,nm
            write(mnum2,'(i0,a,i0,a,i0)') n,"m",tmp2,"r",ri! 
            write(flname,'(a,a)') trim(mnum2),'.com' 
 
-           if (debug(2) .eqv. .false.) write(181,'(a,a)')  'g09  ',trim(flname)  !,".log"  !181 alone 
+           if (debug(2) .eqv. .false.) write(181,'(a,a)')  'g16  ',trim(flname)  !,".log"  !181 alone 
              do iin=1,nam(n)
                 dtc(1:3,iin)=c(1:3,iin,n)
                 do i=1,3
@@ -455,7 +470,7 @@ do m=1,nm
 !    Dimers
 !##################################################
            write(flname,'(2(i0,a))') m,'t',n,'.com ' 
-           if (debug(2) .eqv. .false.) write(181,'(a,a)')  'g09  ',flname !, ".log"  !181 dimer  
+           if (debug(2) .eqv. .false.) write(181,'(a,a)')  'g16  ',flname !, ".log"  !181 dimer  
            write(flnm,'(2(i0,a))') m,'t',n,'.log' 
            if (debug(2) .eqv. .false.) write(181,'(a)')  'orbital="error"'
            if (debug(2) .eqv. .false.) write(181,'(a,xa,xa)')  'orbital=`g09log', trim(flnm) ,'1  | tail -1`'
@@ -478,8 +493,9 @@ do m=1,nm
            stt(m,n)=.true.
            rt=rt+4
 !!!!!!!!!!!!!!!!!!!!!!!!!
-! calculate 3D MORSE code
+! calculate descriptor code
 !!!!!!!!!!!!!!!!!!!!!!!!!
+        if (nf.ne.0) then 
             call morse3d(sc,method,dc(1:3,1:tmp),delemt(1:tmp),tmp,morU,morM,morV,morP,morE,tchg,morC) !normal 3D-MORSE
             write(300,"(i5,i5,12(xf13.5),20(xf11.5))") m,n,morC
             write(301,"(i5,i5,12(xf13.5),20(xf11.5))") m,n,morU
@@ -489,16 +505,16 @@ do m=1,nm
             write(305,"(i5,i5,12(xf13.5),20(xf11.5))") m,n,morE
             !write(*,*) m,n, "1 heading"
 
-			call morse3ddimer(sc,method,c(:,1:nam(m),m),elemt(1:nam(m),m),nam(m),&      !CIP,  exclude intramolecular interaction
-					&dtc(:,1:nam(n)),elemt(1:nam(n),n),nam(n),&
-					& morU,morM,morV,morP,morE,tchg,tchg,morC,cip,anglhist,rhist,rchist)
+            call morse3ddimer(sc,method,c(:,1:nam(m),m),elemt(1:nam(m),m),nam(m),&      !CIP,  exclude intramolecular interaction
+                    &dtc(:,1:nam(n)),elemt(1:nam(n),n),nam(n),&
+                    & morU,morM,morV,morP,morE,tchg,tchg,morC,cip,anglhist,rhist,rchist)
             write(400,"(i5,i5,12(xf13.5),20(xf11.5))") m,n,morC
             write(401,"(i5,i5,12(xf13.5),20(xf11.5))") m,n,morU
             write(402,"(i5,i5,12(xf13.5),20(xf11.5))") m,n,morM
             write(403,"(i5,i5,12(xf13.5),20(xf11.5))") m,n,morV
             write(404,"(i5,i5,12(xf13.5),20(xf11.5))") m,n,morP
             write(405,"(i5,i5,12(xf13.5),20(xf11.5))") m,n,morE
-			write(410,900) m,n,cip(1:nam(m),1:nam(n))
+            write(410,900) m,n,cip(1:nam(m),1:nam(n))
             write(309,"(102(i5))") m,n,anglhist
             write(310,"(102(i5))") m,n,rhist
             !write(*,*) m,n, "1 mid"
@@ -507,18 +523,18 @@ do m=1,nm
             call  calparam4(mindx(1:4),dc(:,1:nam(m)),nam(m),mindx(1:4),dtc(:,1:nam(n)),nam(n),morU) 
             write(411,"(i5,i5,16(xf13.5))") m,n,(morU(i),i=1,16)
 
-			call dnearest(c(:,1:nam(m),m),elemt(1:nam(m),m),nam(m),&    ! !  nearest 32th distance 
-					&dtc(:,1:nam(n)),elemt(1:nam(n),n),nam(n),&
-					& morU,morM,morV,morP,morE,tchg,tchg,morC)
-			write(408,"(i5,i5,12(xf13.5),20(xf11.5))",ADVANCE='NO') m,n, (morU(i),i=1,32)
+            call dnearest(c(:,1:nam(m),m),elemt(1:nam(m),m),nam(m),&    ! !  nearest 32th distance 
+                    &dtc(:,1:nam(n)),elemt(1:nam(n),n),nam(n),&
+                    & morU,morM,morV,morP,morE,tchg,tchg,morC)
+            write(408,"(i5,i5,12(xf13.5),20(xf11.5))",ADVANCE='NO') m,n, (morU(i),i=1,32)
             call calparam4v(mindx(1:4),dc(:,1:nam(m)),nam(m),&        !! OUTFRAME OF MOLECULES
             mindx(1:4),dtc(:,1:nam(n)),nam(n),morU)
             write(408,"(22(xf10.5))") (morU(i),i=1,22) 
 
-			call msnearest(c(:,1:nam(m),m),elemt(1:nam(m),m),nam(m),&    !! 3D-MORSE calculated on nearest atoms
-					&dtc(:,1:nam(n)),elemt(1:nam(n),n),nam(n),&
-					& morU,morM,morV,morP,morE,tchg,tchg,morC)
-			write(409,"(i5,i5,12(xf13.5),20(xf11.5))") m,n,morU ! 32
+            call msnearest(c(:,1:nam(m),m),elemt(1:nam(m),m),nam(m),&    !! 3D-MORSE calculated on nearest atoms
+                    &dtc(:,1:nam(n)),elemt(1:nam(n),n),nam(n),&
+                    & morU,morM,morV,morP,morE,tchg,tchg,morC)
+            write(409,"(i5,i5,12(xf13.5),20(xf11.5))") m,n,morU ! 32
 
 !!!!!descriptors: seperated whole molecule                              
             call calparam2(mindx(1:4),dc(:,1:nam(m)),nam(m),&           !!!!!!!!! MOL 
@@ -580,7 +596,7 @@ do m=1,nm
                    write(604,"(i5,i5)",advance='no') m,n
                    write(605,"(i5,i5)",advance='no') m,n
                    write(606,900,ADVANCE='NO') m,n
-			!write(*,*) "stage 2";read(*,*) kkn
+            !write(*,*) "stage 2";read(*,*) kkn
             do kkm=1,nchain
                 do kkn=1,nchain 
                     call calparam2(piindxnew(1:4,kkm),tpicrd(:,:,kkm,1),ichain(kkm),&    !  PI
@@ -626,11 +642,12 @@ do m=1,nm
                 end do 
             end do
             write(306,*);write(406,*)
-			write(500,*);write(501,*);write(502,*);write(503,*);write(504,*);write(505,*)
-			write(600,*);write(601,*);write(602,*);write(603,*);write(604,*);write(605,*);write(606,*)
+            write(500,*);write(501,*);write(502,*);write(503,*);write(504,*);write(505,*)
+            write(600,*);write(601,*);write(602,*);write(603,*);write(604,*);write(605,*);write(606,*)
             write(609,*);write(610,*)
-        end if 
-
+        end if ! end descriptor generation
+        end if ! end output dimer
+        
         write(191,"(3(a))") "grep ' ",trim(flnm), " ' tmp.out >> v.out" 
    end do!n
 340   backspace(131)
@@ -646,12 +663,14 @@ end do !m
 close(131)
 if (rt<=32) close(181)
 close(191);close(211)
-close(400);close(401);close(402);close(403);close(404);close(405);close(406);close(407);close(408);close(409)
-close(410);close(411)
-close(300);close(301);close(302);close(303);close(304);close(305);close(306);
-close(307);close(308);close(309);close(310);
-close(600);close(601);close(602);close(603);close(604);close(605);close(606);close(609);close(610)
-close(500);close(501);close(502);close(503);close(504);close(505)
+if (nf.ne.0) then 
+    close(400);close(401);close(402);close(403);close(404);close(405);close(406);close(407);close(408);close(409)
+    close(410);close(411)
+    close(300);close(301);close(302);close(303);close(304);close(305);close(306);
+    close(307);close(308);close(309);close(310);
+    close(600);close(601);close(602);close(603);close(604);close(605);close(606);close(609);close(610)
+    close(500);close(501);close(502);close(503);close(504);close(505)
+end if 
 
 900  format(' ',i5,i5,*(xf9.5))
 stop
