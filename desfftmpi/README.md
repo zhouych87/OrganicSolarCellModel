@@ -1,26 +1,37 @@
-# This program wrote in fortran to generate descriptors
-# intel mpi is required.
-# how to compile
+# This program is written in Fortran to read gro files, and generate Gaussian input and descriptors
+# Intel mpi is required.
 
-copy all file into a folder and then input make in the terminal. "desfftmpi" will be generated
+For more about descriptors please read:
+# Intermolecular 3D-MoRSE Descriptors for Fast and Accurate Prediction of Electronic Couplings in Organic Semiconductors
+J. Chem. Inf. Model. 2023, 63, 5089−5096
+https://pubs.acs.org/doi/10.1021/acs.jcim.3c00786
 
-# copy it to your PATH folders. make sure you can use is just type desfftmpi in terminal.
+# How to compile
+
+copy all files into a folder and then input make in the terminal. "desfftmpi" will be generated
+
+copy it to your PATH folders. make sure you can use it just type desfftmpi in terminal.
 
 # how to use:
 
 mpirun -n 24 desfftmpi tet.itp d3dpi cn 0.1 tet.gro 100
 
 tet.itp: is the force field file to generate films. It is required to find conjugated atoms
-tet.gro: is the atom cooridnation of film, which the format of GROMACS structure.
-d3dpi: tells the program what descriptors will be generated. See below for details.
-cn: is the core function form. See below for details.
+
+tet.gro: is the atom coordination of film, which is the format of GROMACS structure.
+
+d3dpi (destype): tells the program what descriptors will be generated. Please take a look below for details.
+
+cn (method): is the core function form. Please take a look below for more information.
+
 0.1: is scale factor
-100: It the dimension of descriptors, which is the range of S in 3D MoRSE.
+
+100: is the dimension of descriptors, which is the range of S in 3D MoRSE.
 
 
 ##what descriptors will be generated:
 
-    if (trim(method) == 'geo') then
+    if (trim(destype) == 'geo') then
         write(*,*) "Generate geometry based descriptors: open file "
         open(307,file="zhougeo.dat",status='replace')
         open(308,file="geo.dat",status='replace')
@@ -31,14 +42,14 @@ cn: is the core function form. See below for details.
         open(409,file="neardisfft.dat",status='replace')
         open(410,file="cip.dat",status='replace')
         open(411,file="frame4.dat",status='replace')
-    else if (trim(method) == 'geopi') then
+    else if (trim(destype) == 'geopi') then
         write(*,*) "Generate geometry based descriptors: open file "
         open(306,file="pizhougeopi.dat",status='replace')
         open(406,file="pir.dat",status='replace')
         open(606,file="picip.dat",status='replace')
         open(609,file="piangle3d.dat",status='replace')
         open(610,file="pirdfhist.dat",status='replace')
-    else if (trim(method) == '3dm') then
+    else if (trim(destype) == '3dm') then
         write(*,*) "Generate 3D MORSE descriptors"
         open(300,file="c3dm.dat",status='replace')
         open(301,file="u3dm.dat",status='replace')
@@ -46,7 +57,7 @@ cn: is the core function form. See below for details.
         open(303,file="v3dm.dat",status='replace')
         open(304,file="p3dm.dat",status='replace')
         open(305,file="e3dm.dat",status='replace')
-    else if (trim(method) == 'd3d') then
+    else if (trim(destype) == 'd3d') then
         write(*,*) "Generate intermolecular 3D MORSE descriptors"
         open(400,file="dc3d.dat",status='replace')
         open(401,file="du3d.dat",status='replace')
@@ -54,7 +65,7 @@ cn: is the core function form. See below for details.
         open(403,file="dv3d.dat",status='replace')
         open(404,file="dp3d.dat",status='replace')
         open(405,file="de3d.dat",status='replace')
-    else if (trim(method) == '3dpi') then
+    else if (trim(destype) == '3dpi') then
         write(*,*) "Generate pi 3D MORSE descriptors"
         open(500,file="c3dpi.dat",status='replace')
         open(501,file="u3dpi.dat",status='replace')
@@ -62,7 +73,7 @@ cn: is the core function form. See below for details.
         open(503,file="v3dpi.dat",status='replace')
         open(504,file="p3dpi.dat",status='replace')
         open(505,file="e3dpi.dat",status='replace')
-    else if (trim(method) == 'd3dpi') then
+    else if (trim(destype) == 'd3dpi') then
         write(*,*) "Generate intermolecular pi 3D MORSE descriptors"
         open(600,file="dc3dpi.dat",status='replace')
         open(601,file="du3dpi.dat",status='replace')
