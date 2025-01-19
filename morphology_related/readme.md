@@ -1,4 +1,3 @@
-markdown复制
 # Python Scripts for Molecular Dynamics Analysis
 
 This repository contains a collection of Python scripts designed to analyze molecular dynamics simulation data, specifically for the eC9 system. The scripts cover various stages of data processing, from feature extraction to clustering and visualization. Below is a detailed description of each script and its functionality.
